@@ -126,7 +126,6 @@ void MetallicDelayAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     feedbackFilter.prepare(sampleRate, samplesPerBlock, getTotalNumOutputChannels());
 
     const int maxDelaySamples = (int)(sampleRate);
-    //const int maxDelaySamples = (int)(sampleRate * 0.05);
 
     combDelays.resize(getTotalNumInputChannels());
 
@@ -174,71 +173,9 @@ void MetallicDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    float delayTime = delayTimeParam->load();
-    float feedback = feedbackParam->load();
-    float modRate = modRateParam->load();
-    float modDepth = modDepthParam->load();
-    float modType = modTypeParam->load();
-    float hpCutoff = hpCutoffParam->load();
-    float lpCutoff = lpCutoffParam->load();
-    float drive = driveParam->load();
-    float distortionMode = distortionModeParam->load();
-    float output = outputParam->load();
-    float mix = mixParam->load();
+    updateParameters(totalNumInputChannels, buffer.getNumSamples());
 
-    bool shouldBeEnabled = !juce::approximatelyEqual(modDepth, 0.f);
-
-    if (lfo.getWaveType() != static_cast<int>(modType)) {
-        lfo.setWaveType(static_cast<LFO::WaveType>(modType));
-    }
-
-    if (lfo.isEnabled != shouldBeEnabled) {
-        lfo.enableLFO(shouldBeEnabled);
-    }
-
-    if (lfo.isEnabled) {
-        lfo.updateLFOState(buffer.getNumSamples());
-        float minValue = delayTime * (1 - modDepth);
-        float modDelayTime = std::max(float(lfo.getCurrentValue() * modDepth * delayTime + minValue), 0.1f);
-        delayTime = modDelayTime;
-    }
-
-    if (!juce::approximatelyEqual(modRate, lfo.freq)) {
-        lfo.setFreq(modRate);
-    }
-
-    if (!juce::approximatelyEqual(drive, distortion.getAmount())) {
-        distortion.setAmount(drive);
-    }
-
-    if (!juce::approximatelyEqual(static_cast<Distortion::Mode>(distortionMode), distortion.getMode())) {
-        distortion.setMode(static_cast<Distortion::Mode>(distortionMode));
-    }
-
-    if (!juce::approximatelyEqual(hpCutoff, feedbackFilter.getHighCutoff())) {
-        feedbackFilter.updateHighpass(hpCutoff);
-    }
-
-    if (!juce::approximatelyEqual(lpCutoff, feedbackFilter.getLowCutoff())) {
-        feedbackFilter.updateLowpass(lpCutoff);
-    }
-    if (!juce::approximatelyEqual(output, previousOutput)) {
-        previousOutput = output;
-        gainLinear = juce::Decibels::decibelsToGain(output);
-    }
-    if (!juce::approximatelyEqual(mix, previousMix)) {
-        previousMix = mix;
-        setDryWetMix();
-    }
-
-    for (int channel = 0; channel < totalNumInputChannels; ++channel) {
-        if (!juce::approximatelyEqual(delayTime, combDelays[channel].getDelayMs())) {
-            combDelays[channel].setDelayMs(delayTime);
-        }
-        if (!juce::approximatelyEqual(feedback, combDelays[channel].getFeedback())) {
-            combDelays[channel].setFeedback(feedback);
-        }
-    }
+    
 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
@@ -296,6 +233,75 @@ void MetallicDelayAudioProcessor::setDryWetMix()
 {
     dryGain = std::cos(previousMix * juce::MathConstants<float>::halfPi);
     wetGain = std::sin(previousMix * juce::MathConstants<float>::halfPi);
+}
+
+void MetallicDelayAudioProcessor::updateParameters(int numChannels, int numSamples)
+{
+    float delayTime = delayTimeParam->load();
+    float feedback = feedbackParam->load();
+    float modRate = modRateParam->load();
+    float modDepth = modDepthParam->load();
+    float modType = modTypeParam->load();
+    float hpCutoff = hpCutoffParam->load();
+    float lpCutoff = lpCutoffParam->load();
+    float drive = driveParam->load();
+    float distortionMode = distortionModeParam->load();
+    float output = outputParam->load();
+    float mix = mixParam->load();
+
+    bool shouldBeEnabled = !juce::approximatelyEqual(modDepth, 0.f);
+
+    if (lfo.getWaveType() != static_cast<int>(modType)) {
+        lfo.setWaveType(static_cast<LFO::WaveType>(modType));
+    }
+
+    if (lfo.isEnabled != shouldBeEnabled) {
+        lfo.enableLFO(shouldBeEnabled);
+    }
+
+    if (lfo.isEnabled) {
+        lfo.updateLFOState(numSamples);
+        float minValue = delayTime * (1 - modDepth);
+        float modDelayTime = std::max(float(lfo.getCurrentValue() * modDepth * delayTime + minValue), 0.1f);
+        delayTime = modDelayTime;
+    }
+
+    if (!juce::approximatelyEqual(modRate, lfo.freq)) {
+        lfo.setFreq(modRate);
+    }
+
+    if (!juce::approximatelyEqual(drive, distortion.getAmount())) {
+        distortion.setAmount(drive);
+    }
+
+    if (!juce::approximatelyEqual(static_cast<Distortion::Mode>(distortionMode), distortion.getMode())) {
+        distortion.setMode(static_cast<Distortion::Mode>(distortionMode));
+    }
+
+    if (!juce::approximatelyEqual(hpCutoff, feedbackFilter.getHighCutoff())) {
+        feedbackFilter.updateHighpass(hpCutoff);
+    }
+
+    if (!juce::approximatelyEqual(lpCutoff, feedbackFilter.getLowCutoff())) {
+        feedbackFilter.updateLowpass(lpCutoff);
+    }
+    if (!juce::approximatelyEqual(output, previousOutput)) {
+        previousOutput = output;
+        gainLinear = juce::Decibels::decibelsToGain(output);
+    }
+    if (!juce::approximatelyEqual(mix, previousMix)) {
+        previousMix = mix;
+        setDryWetMix();
+    }
+
+    for (int channel = 0; channel < numChannels; ++channel) {
+        if (!juce::approximatelyEqual(delayTime, combDelays[channel].getDelayMs())) {
+            combDelays[channel].setDelayMs(delayTime);
+        }
+        if (!juce::approximatelyEqual(feedback, combDelays[channel].getFeedback())) {
+            combDelays[channel].setFeedback(feedback);
+        }
+    }
 }
 
 //==============================================================================

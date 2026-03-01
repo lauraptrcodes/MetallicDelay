@@ -78,8 +78,8 @@ private:
     float dryGain = 0.5f;
     float wetGain = 0.5f;
     void setDryWetMix();
+    void updateParameters(int numChannels, int numSamples);
     
-    //CombDelay delay;
     std::vector<CombDelay> combDelays;
     FeedbackFilter feedbackFilter;
     Distortion distortion;
