@@ -17,15 +17,10 @@ namespace UIColours
 
     // Accents
     static const juce::Colour accent = juce::Colour::fromString("#E03131");
-    static const juce::Colour accentSoft = juce::Colour::fromString("#CCFF6A00");
 
     // Text
     static const juce::Colour textPrimary = juce::Colour::fromString("#FFFFFF");
     static const juce::Colour textMuted = juce::Colour::fromString("#FFADADAD");
-
-    // States
-    static const juce::Colour hover = juce::Colour::fromString("#333333");
-    static const juce::Colour disabled = juce::Colour::fromString("#666666");
 }
 
 //==============================================================================

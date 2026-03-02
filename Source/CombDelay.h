@@ -21,7 +21,6 @@ public:
     float getDelayMs() { return delayMs; }
     void setFeedback(float fb) { feedback = juce::jlimit(0.0f, 0.999f, fb); }
     float getFeedback() { return feedback; }
-    void processSample(float s);
     float read();
     void write(float output);
 

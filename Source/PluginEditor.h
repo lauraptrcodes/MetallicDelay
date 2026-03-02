@@ -28,7 +28,6 @@ public:
     static constexpr int padding = 36;
 private:
     void configLabel(juce::Label& l, juce::Component& attachedComp, juce::String text);
-   // void configSlider(juce::Label& l, juce::Component& attachedComp, juce::String text, juce::AudioProcessorValueTreeState::SliderAttachment& sliderAttachement, juce::String paramID);
 
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> delayTimeAttachement;
     juce::Slider delayTimeSlider;

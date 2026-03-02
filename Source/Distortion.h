@@ -38,8 +38,8 @@ public:
         case Distortion::Softclip:
             return std::tanh(x * preGain);
         case Distortion::Hardclip:
-            return juce::jlimit(-1.0f, 1.0f, x * preGain);
-            //return juce::jlimit(-threshold, threshold, x);
+            //return juce::jlimit(-1.0f, 1.0f, x * preGain);
+            return juce::jlimit(-threshold, threshold, x);
         case Distortion::Wavefold:
             return wavefold(x * preGain);
         default:
@@ -54,12 +54,11 @@ private:
         switch (mode)
         {
         case Mode::Softclip:  return std::pow(drive, 2.5f);
-        case Mode::Hardclip:  return std::pow(drive, 3.0f);
-        case Mode::Wavefold:  return std::pow(drive, 2.5f);
+        case Mode::Hardclip:  return std::pow(drive, 2.0f);
+        case Mode::Wavefold:  return std::pow(drive, 3.5f);
         }
     }
 
-    //buchla approximation?
     float wavefold(float x) {
         return std::abs(std::fmod(x + 1.0f, 4.0f) - 2.0f) - 1.0f;
     }

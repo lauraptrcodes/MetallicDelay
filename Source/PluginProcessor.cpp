@@ -175,8 +175,6 @@ void MetallicDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 
     updateParameters(totalNumInputChannels, buffer.getNumSamples());
 
-    
-
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
@@ -192,11 +190,10 @@ void MetallicDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
             float distorted = distortion.processSample(delayed);
 
             float lPassed = feedbackFilter.lowpass.processSample(distorted);
-            float wet = feedbackFilter.highpass.processSample(lPassed);
-            wet *= combDelays[channel].getFeedback();
+            float hpassed = feedbackFilter.highpass.processSample(lPassed);
+            float wet = hpassed * combDelays[channel].getFeedback();
 
             float out = in + wet;
-
 
             combDelays[channel].write(out);
             channelData[i] = (in * dryGain + wet * wetGain) * gainLinear;

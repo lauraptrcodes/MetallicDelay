@@ -50,13 +50,11 @@ void LFO::setSampleRate(double sr)
     this->sampleRate = sr;
 }
 
-// reinit when freq changes & when samplesToHold == 0
 void LFO::initSampleHold()
 {
     currentValue = random.nextFloat();
     int freqInSamples = int(sampleRate / freq);
     samplesToHold = random.nextFloat() * freqInSamples;
-    DBG(currentValue);
 }
 
 void LFO::updateSampleHold(int bufferSize)
