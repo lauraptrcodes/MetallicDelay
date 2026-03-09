@@ -38,8 +38,7 @@ public:
         case Distortion::Softclip:
             return std::tanh(x * preGain);
         case Distortion::Hardclip:
-            //return juce::jlimit(-1.0f, 1.0f, x * preGain);
-            return juce::jlimit(-threshold, threshold, x);
+            return juce::jlimit(-threshold, threshold, x * preGain);
         case Distortion::Wavefold:
             return wavefold(x * preGain);
         default:
